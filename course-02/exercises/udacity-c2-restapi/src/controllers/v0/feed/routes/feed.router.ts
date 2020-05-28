@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, response } from 'express';
 import { FeedItem } from '../models/FeedItem';
 import { requireAuth } from '../../users/routes/auth.router';
 import * as AWS from '../../../../aws';
@@ -18,6 +18,15 @@ router.get('/', async (req: Request, res: Response) => {
 
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
+router.get('/resource/:id',requireAuth,async(req:Request,res:Response)=>{
+    let {id}=req.params
+    const resource:FeedItem= await FeedItem.find(id)
+    if(!resource){
+        res.send(404).send("resource does not exist")
+    }
+    resource.url=AWS.getGetSignedUrl(resource.url)
+    res.sendStatus(200).send(resource)
+})
 
 // update a specific resource
 router.patch('/:id', 
