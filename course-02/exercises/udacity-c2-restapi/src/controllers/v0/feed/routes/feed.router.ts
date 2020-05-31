@@ -18,22 +18,42 @@ router.get('/', async (req: Request, res: Response) => {
 
 //@TODO
 //Add an endpoint to GET a specific resource by Primary Key
+router.get('/resource/pk/',async (req:Request,res:Response)=>{
+    const {pkey}=req.query
+    const items=await FeedItem.findByPk(pkey)
+    if(!items){
+        res.statusCode=404
+        res.send('requested resource cannot be found')
+    }
+    res.statusCode=200
+    res.send(items)
+})
 router.get('/resource/:id',requireAuth,async(req:Request,res:Response)=>{
     let {id}=req.params
     const resource:FeedItem= await FeedItem.find(id)
     if(!resource){
-        res.send(404).send("resource does not exist")
+        res.statusCode=404
+        res.send("resource does not exist")
     }
     resource.url=AWS.getGetSignedUrl(resource.url)
-    res.sendStatus(200).send(resource)
+    res.statusCode=200
+    res.send(resource)
 })
 
 // update a specific resource
 router.patch('/:id', 
     requireAuth, 
     async (req: Request, res: Response) => {
-        //@TODO try it yourself
-        res.send(500).send("not implemented")
+    //@TODO try it yourself
+    const {Id}=req.params
+    const new_feed_obj = req.body
+    const item = await FeedItem.update(new_feed_obj, {where:{id:Id}});
+    if(!item){
+        res.statusCode=404
+        res.send("Operation failed : Id doesn't exist")
+    }
+    res.statusCode=201
+    res.send(item)
 });
 
 
